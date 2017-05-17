@@ -12,7 +12,7 @@
 
 #define MOTOR_DRIVER_PHASE_TRIS (TRISDbits.TRISD11)
 
-/* When 0 -> current flows from OUT1 to OUT2 on motor driver PCB */
+/* When 0 -> current flows from OUT1 to OUT2 on motor driver carrier */
 #define MOTOR_DRIVER_PHASE       (LATDbits.LATD11)
 
 /* Using PWM1 channel, DC = duty cycle */
