@@ -11,6 +11,7 @@
 #include "Tick.h"
 
 static const u8 mscu8DayArr[7][5] = {"Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."};
+static const u8 mscu8RepeatStrArr[4][16] = {"Never", "Every Day", "Every Other Day", "Every Week"};
 
 u8 mu8MenuHandlerDelay;
 
@@ -475,6 +476,82 @@ u8 u8MenuConfigureDuration(vo)
 /*
 ********************************************************************************
  * 
+ * FUNCTION NAME  : u8MenuConfigureRepeat
+ * 
+ * DESCRIPTION    : The user may choose if the watering is to be repeated
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : 8-bit number, the repeat type of the watering
+ * 
+ * NOTE           : Returns 150 when not done
+ * 
+******************************************************************************** 
+*/
+u8 u8MenuConfigureRepeat(vo)
+{
+   static u8 su8Repeat = 0;
+   
+   static u8 su8Counter = 0;
+   static u8 su8RotaryCounter;  
+   static u8 su8RotPreVal = 150;
+   
+   static TICK_STATUS senTick;
+   static TICK_STATUS senPreTick;
+   
+   static LOCK_STATUS enLockStatus = UNLOCKED;
+   
+   if (enLockStatus == UNLOCKED)
+   {
+      /* Set this  */
+      voOLEDClear();
+      voOLEDHome();
+      printf("Repeat watering?");
+      voResetRotaryValue();
+      enLockStatus = LOCKED;  /* Lock to make this code just run once */
+   }
+   
+   /* Run voRotaryEncoderTask with maxcount = 3 */
+   voRotaryEncoderTask(3, 0, 1);
+   su8RotaryCounter = u8GetRotaryValue(); 
+   
+   /* Run the tick task and get the value */
+   voTickTask(25);
+   senTick = enGetTick();
+  
+   if (su8RotaryCounter != su8RotPreVal || senTick != senPreTick)
+   {
+      voOLEDRowTwo();
+      if (senTick == ON)
+      {
+         printf("%s", mscu8RepeatStrArr[su8RotaryCounter]);
+      }
+      else if (senTick == OFF)
+      {
+         printf("                ");
+      }
+      su8RotPreVal = su8RotaryCounter;
+      senPreTick = senTick;
+   }
+   
+   if (enGetRotaryButton() == PRESSED)
+   {
+      su8Repeat = su8RotaryCounter;
+      su8RotPreVal = 150;
+      su8Counter = 0;
+      senPreTick = OFF;
+      voTickReset();
+      voResetRotaryValue();
+      enLockStatus = UNLOCKED;
+      
+      return su8Repeat;
+   }
+   return 150;
+}
+
+/*
+********************************************************************************
+ * 
  * FUNCTION NAME  : u8MenuAddNewToSchedule
  * 
  * DESCRIPTION    : The user adds a new watering event
@@ -493,12 +570,14 @@ u8 u8MenuAddNewToSchedule(vo)
    {
       CHOOSE_POT = 0,
       CHOOSE_DURATION,
+      CHOOSE_REPEAT,
       CHOOSE_TIME
    }ADD_EVENT_TYPE;
 
    static ADD_EVENT_TYPE senStateAddEvent = CHOOSE_POT;
    static u8 su8Pot = 150;
    static u8 su8Duration = 150;
+   static u8 su8Repeat = 150;
    static u8 su8SchedulingTime[7];
    
    switch(senStateAddEvent)
@@ -517,10 +596,20 @@ u8 u8MenuAddNewToSchedule(vo)
          
          if (su8Duration != 150)
          {
+            senStateAddEvent = CHOOSE_REPEAT;
+         }
+      break;
+      
+      case CHOOSE_REPEAT:
+         su8Repeat = u8MenuConfigureRepeat();
+         
+         if (su8Repeat != 150)
+         {
             memset(su8SchedulingTime, '\0', sizeof(su8SchedulingTime));
             voRTCGetDateTime(su8SchedulingTime);
             senStateAddEvent = CHOOSE_TIME;
          }
+         
       break;
 
       case CHOOSE_TIME:
@@ -528,7 +617,7 @@ u8 u8MenuAddNewToSchedule(vo)
          {
             senStateAddEvent = CHOOSE_POT;
             
-            if (u8SchedulePushBack(su8Pot, su8Duration,su8SchedulingTime))
+            if (u8SchedulePushBack(su8Pot, su8Duration, su8Repeat, su8SchedulingTime))
             {
                /* Added event ok */
                return 1;
@@ -565,12 +654,14 @@ u8 u8MenuChangeInSchedule(u8 u8EventNum)
    {
       CHOOSE_POT = 0,
       CHOOSE_DURATION,
+      CHOOSE_REPEAT,
       CHOOSE_TIME
    }CHANGE_EVENT_TYPE;
 
    static CHANGE_EVENT_TYPE senStateChangeEvent = CHOOSE_POT;
    static u8 su8Pot = 150;
    static u8 su8Duration = 150;
+   static u8 su8Repeat = 150;
    static u8 su8SchedulingTime[7];
    
    switch(senStateChangeEvent)
@@ -589,6 +680,15 @@ u8 u8MenuChangeInSchedule(u8 u8EventNum)
          
          if (su8Duration != 150)
          {
+            senStateChangeEvent = CHOOSE_REPEAT;
+         }
+      break;
+      
+      case CHOOSE_REPEAT:
+         su8Repeat = u8MenuConfigureRepeat();
+         
+         if (su8Repeat != 150)
+         {
             memset(su8SchedulingTime, '\0', sizeof(su8SchedulingTime));
             voScheduleGetElementTime(u8EventNum, su8SchedulingTime);
             senStateChangeEvent = CHOOSE_TIME;
@@ -600,7 +700,7 @@ u8 u8MenuChangeInSchedule(u8 u8EventNum)
          {  
             senStateChangeEvent = CHOOSE_POT;
             
-            if (u8ScheduleChangeAny(u8EventNum, su8Pot, su8Duration, su8SchedulingTime))
+            if (u8ScheduleChangeAny(u8EventNum, su8Pot, su8Duration, su8Repeat, su8SchedulingTime))
             {
                return 1;   /* OK */
             }
@@ -613,7 +713,6 @@ u8 u8MenuChangeInSchedule(u8 u8EventNum)
    }
    return 0;
 }
-
 
 /*
 ********************************************************************************

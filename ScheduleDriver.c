@@ -12,7 +12,6 @@
 
 static SCHEDULE_ITEM msstScheduleArr[MAX_SIZE + 1];
 static u8 msu8Size = 0;
-/*Hejaskjkjf*/
 /*
 ********************************************************************************
  * 
@@ -105,13 +104,13 @@ vo voSchdeuleGetFirstElement(SCHEDULE_ITEM* stFirstElementPtr)
    
    stFirstElementPtr->u8Pot = msstScheduleArr[0].u8Pot;
    stFirstElementPtr->u8Duration = msstScheduleArr[0].u8Duration;
+   stFirstElementPtr->u8Repeat = msstScheduleArr[0].u8Repeat;
    
    for (u8Index = 0; u8Index < 7; u8Index++)
    {
       stFirstElementPtr->u8Time[u8Index] = msstScheduleArr[0].u8Time[u8Index];
    }
 }
-
 
 /*
 ********************************************************************************
@@ -220,17 +219,20 @@ vo voScheduleSort(vo)
                /* Copy right hand item to a temporary item */
                stTemp.u8Pot = msstScheduleArr[u8Inner].u8Pot;
                stTemp.u8Duration = msstScheduleArr[u8Inner].u8Duration;
+               stTemp.u8Repeat = msstScheduleArr[u8Inner].u8Repeat;
                memset(stTemp.u8Time, '\0', sizeof(stTemp.u8Time));
                memcpy(stTemp.u8Time, msstScheduleArr[u8Inner].u8Time, sizeof(msstScheduleArr[u8Inner].u8Time));
 
                /* Replace the right hand item with the left hand one */
                msstScheduleArr[u8Inner].u8Pot = msstScheduleArr[u8Inner - 1].u8Pot;
-               msstScheduleArr[u8Inner].u8Duration = msstScheduleArr[u8Inner -1].u8Duration;
+               msstScheduleArr[u8Inner].u8Duration = msstScheduleArr[u8Inner - 1].u8Duration;
+               msstScheduleArr[u8Inner].u8Repeat = msstScheduleArr[u8Inner -1].u8Repeat;
                memcpy(msstScheduleArr[u8Inner].u8Time, msstScheduleArr[u8Inner - 1].u8Time, sizeof(msstScheduleArr[u8Inner].u8Time));
 
                /* At last: copy the temporary to the left hand item */
                msstScheduleArr[u8Inner - 1].u8Pot = stTemp.u8Pot;
                msstScheduleArr[u8Inner -1].u8Duration = stTemp.u8Duration;
+               msstScheduleArr[u8Inner -1].u8Repeat = stTemp.u8Repeat;
                memcpy(msstScheduleArr[u8Inner - 1].u8Time, stTemp.u8Time, sizeof(msstScheduleArr[u8Inner - 1].u8Time));
             }
             /* If the current inner element is bigger than the left one, it will be bigger than all left hand elements */
@@ -250,8 +252,8 @@ vo voScheduleSort(vo)
  * 
  * DESCRIPTION    : Adds an item to the end of schedule
  * 
- * INPUT          : 8-bit number (the pot to be watered), 8-bit number (duration)
- *                  8-bit pointer of size 7
+ * INPUT          : 8-bit number (the pot to be watered), 8-bit number (duration),
+ *                  8-bit number (repeat), 8-bit pointer of size 7
  * 
  * OUTPUT         : 8-bit number (0 = fail, 1 = OK)
  * 
@@ -259,7 +261,7 @@ vo voScheduleSort(vo)
  * 
 ******************************************************************************** 
 */
-u8 u8SchedulePushBack(u8 u8Pot, u8 u8Duration, u8* u8DateTime)
+u8 u8SchedulePushBack(u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTime)
 {
    u8 u8CurrentTimeArr[7];
    
@@ -269,6 +271,7 @@ u8 u8SchedulePushBack(u8 u8Pot, u8 u8Duration, u8* u8DateTime)
    {
       msstScheduleArr[msu8Size].u8Pot = u8Pot;
       msstScheduleArr[msu8Size].u8Duration = u8Duration;
+      msstScheduleArr[msu8Size].u8Repeat = u8Repeat;
       memset(msstScheduleArr[msu8Size].u8Time, '\0', sizeof(msstScheduleArr[msu8Size].u8Time));
       memcpy(msstScheduleArr[msu8Size].u8Time, u8DateTime, sizeof(msstScheduleArr[msu8Size].u8Time));
       
@@ -308,11 +311,13 @@ vo voSchedulePopFront(vo)
       {
          msstScheduleArr[u8Counter].u8Pot = msstScheduleArr[u8Counter + 1].u8Pot;
          msstScheduleArr[u8Counter].u8Duration = msstScheduleArr[u8Counter + 1].u8Duration;
+         msstScheduleArr[u8Counter].u8Repeat = msstScheduleArr[u8Counter + 1].u8Repeat;
          memcpy(msstScheduleArr[u8Counter].u8Time, msstScheduleArr[u8Counter + 1].u8Time, sizeof(msstScheduleArr[u8Counter].u8Time));
       }
 
       msstScheduleArr[msu8Size].u8Pot = '\0';
       msstScheduleArr[msu8Size].u8Duration = '\0';
+      msstScheduleArr[msu8Size].u8Repeat = '\0';
       memset(msstScheduleArr[msu8Size].u8Time, '\0', sizeof(msstScheduleArr[msu8Size].u8Time));
       
       msu8Size--;
@@ -344,11 +349,13 @@ vo voScheduleRemoveAny(u8 u8ElementNum)
       {
          msstScheduleArr[u8Counter].u8Pot = msstScheduleArr[u8Counter + 1].u8Pot;
          msstScheduleArr[u8Counter].u8Duration = msstScheduleArr[u8Counter + 1].u8Duration;
+         msstScheduleArr[u8Counter].u8Repeat = msstScheduleArr[u8Counter + 1].u8Repeat;
          memcpy(msstScheduleArr[u8Counter].u8Time, msstScheduleArr[u8Counter + 1].u8Time, sizeof(msstScheduleArr[u8Counter].u8Time));
       }
 
       msstScheduleArr[msu8Size].u8Pot = '\0';
       msstScheduleArr[msu8Size].u8Duration = '\0';
+      msstScheduleArr[msu8Size].u8Repeat = '\0';
       memset(msstScheduleArr[msu8Size].u8Time, '\0', sizeof(msstScheduleArr[msu8Size].u8Time));
       
       msu8Size--;
@@ -363,7 +370,8 @@ vo voScheduleRemoveAny(u8 u8ElementNum)
  * DESCRIPTION    : Removes any element from schedule
  * 
  * INPUT          : 8-bit number (event number), 8-bit number (Pot number),
- *                  8-bit number (duration), 8-bit pointer to array of size 7.
+ *                  8-bit number (duration), 8-bit number (repeat),
+ *                  8-bit pointer to array of size 7.
  * 
  * OUTPUT         : -
  * 
@@ -371,7 +379,7 @@ vo voScheduleRemoveAny(u8 u8ElementNum)
  * 
 ******************************************************************************** 
 */
-u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Duration, u8* u8DateTimeArr)
+u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTimeArr)
 {
    u8 u8CurrentTimeArr[7];
    voRTCGetDateTime(u8CurrentTimeArr);
@@ -380,6 +388,7 @@ u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Duration, u8* u8DateTimeA
    {
       msstScheduleArr[u8ElementNum].u8Pot = u8Pot;
       msstScheduleArr[u8ElementNum].u8Duration = u8Duration;
+      msstScheduleArr[u8ElementNum].u8Repeat = u8Repeat;
       memcpy(msstScheduleArr[u8ElementNum].u8Time, u8DateTimeArr, sizeof(msstScheduleArr[u8ElementNum].u8Time));
       voScheduleSort();
       
