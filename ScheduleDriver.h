@@ -13,6 +13,7 @@ typedef struct
    u8 u8Pot;
    u8 u8Duration;
    u8 u8Time[7];
+   u8 u8Repeat;
 }SCHEDULE_ITEM;
 
 u8 u8ScheduleGetSize(vo);
