@@ -64,6 +64,7 @@ u8 u8FeedPushBack(SCHEDULE_ITEM* stItem)
    {
       msstWateringFeedArr[msu8FeedSize].u8Pot = stItem->u8Pot;
       msstWateringFeedArr[msu8FeedSize].u8Duration = stItem->u8Duration;
+      msstWateringFeedArr[msu8FeedSize].u8Repeat = stItem->u8Repeat;
       memset(msstWateringFeedArr[msu8FeedSize].u8Time, '\0', sizeof(msstWateringFeedArr[msu8FeedSize].u8Time));
       memcpy(msstWateringFeedArr[msu8FeedSize].u8Time, stItem->u8Time, sizeof(msstWateringFeedArr[msu8FeedSize].u8Time));
       
@@ -99,11 +100,13 @@ vo voFeedPopFront(vo)
       {
          msstWateringFeedArr[u8Counter].u8Pot = msstWateringFeedArr[u8Counter + 1].u8Pot;
          msstWateringFeedArr[u8Counter].u8Duration = msstWateringFeedArr[u8Counter + 1].u8Duration;
+         msstWateringFeedArr[u8Counter].u8Repeat = msstWateringFeedArr[u8Counter + 1].u8Repeat;
          memcpy(msstWateringFeedArr[u8Counter].u8Time, msstWateringFeedArr[u8Counter + 1].u8Time, sizeof(msstWateringFeedArr[u8Counter].u8Time));
       }
 
       msstWateringFeedArr[msu8FeedSize].u8Pot = '\0';
       msstWateringFeedArr[msu8FeedSize].u8Duration = '\0';
+      msstWateringFeedArr[msu8FeedSize].u8Repeat = '\0';
       memset(msstWateringFeedArr[msu8FeedSize].u8Time, '\0', sizeof(msstWateringFeedArr[msu8FeedSize].u8Time));
       
       msu8FeedSize--;
@@ -272,6 +275,9 @@ vo voWateringTask(vo)
          if (mu16WateringDelay == 0)
          {
             WATER_PUMP = 0;
+            
+            /* Reschedule watering if required */
+            voScheduleReschedule(msstWateringFeedArr[0]);
             
             /* Enable printing for the RTC */
             voRTCPrintEnable(WATERING);

@@ -26,6 +26,7 @@ vo voSchedulePopFront(vo);
 vo voScheduleRemoveAny(u8 u8ElementNum);
 u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTimeArr);
 u8 u8ScheduleCompareFirst(vo);
+vo voScheduleReschedule(SCHEDULE_ITEM stWatering);
 
 #endif	/* SCHEDULEDRIVER_H */
 

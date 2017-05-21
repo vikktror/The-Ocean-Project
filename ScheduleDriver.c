@@ -8,6 +8,9 @@
 
 #define MAX_SIZE  (9)
 
+#define TRUE      (1)
+#define FALSE     (0)
+
 
 
 static SCHEDULE_ITEM msstScheduleArr[MAX_SIZE + 1];
@@ -436,3 +439,48 @@ u8 u8ScheduleCompareFirst(vo)
    return 0;
 }
 
+vo voScheduleReschedule(SCHEDULE_ITEM stWatering)
+{
+   u8 u8DaysInMonthArr[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+   const static u8 csu8DaysToAddArr[4] = {0, 1, 2, 7};
+   
+   u8 u8NewDay;
+   u8 u8NewMonth;
+   u8 u8NewYear;
+   
+   if (stWatering.u8Repeat != 0)
+   {
+      /* Check if leap year */
+      if ( (stWatering.u8Time[0] % 4) == 0 )
+      {
+         u8DaysInMonthArr[1] = 29;
+      }
+      
+      u8NewYear = stWatering.u8Time[0];
+      u8NewMonth = stWatering.u8Time[1];
+      u8NewDay = stWatering.u8Time[2] + csu8DaysToAddArr[stWatering.u8Repeat];
+      
+      /* If new watering is to be scheduled for next month */
+      if (u8NewDay > u8DaysInMonthArr[stWatering.u8Time[1] - 1])
+      {
+         /* Calculate new day number */
+         u8NewDay = u8NewDay % u8DaysInMonthArr[stWatering.u8Time[1] - 1];
+         u8NewMonth = u8NewMonth + 1;
+         
+         /* If new watering is to be scheduled for next year */
+         if (u8NewMonth > 12)
+         {
+            /* Calculate new month and year number */
+            u8NewMonth = u8NewMonth % 12;
+            u8NewYear = (u8NewYear + 1) % 100;
+         }
+      }
+      
+      stWatering.u8Time[0] = u8NewYear;
+      stWatering.u8Time[1] = u8NewMonth;
+      stWatering.u8Time[2] = u8NewDay;
+      
+      /* Add item to the schedule */
+      u8SchedulePushBack(stWatering.u8Pot, stWatering.u8Duration, stWatering.u8Repeat, stWatering.u8Time);
+   }
+}
