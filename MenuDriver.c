@@ -512,7 +512,7 @@ u8 u8MenuConfigureRepeat(vo)
    }
    
    /* Run voRotaryEncoderTask with maxcount = 3 */
-   voRotaryEncoderTask(3, 0, 1);
+   voRotaryEncoderTask(3, 0, 0);
    su8RotaryCounter = u8GetRotaryValue(); 
    
    /* Run the tick task and get the value */

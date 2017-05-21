@@ -6,14 +6,14 @@
 #include "ScheduleDriver.h"
 #include "RTC.h"
 
-#define MAX_SIZE  (9)
+#define MAX_SIZE  (5)
 
 #define TRUE      (1)
 #define FALSE     (0)
 
 
 
-static SCHEDULE_ITEM msstScheduleArr[MAX_SIZE + 1];
+static SCHEDULE_ITEM msstScheduleArr[MAX_SIZE];
 static u8 msu8Size = 0;
 /*
 ********************************************************************************
@@ -270,7 +270,7 @@ u8 u8SchedulePushBack(u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTime)
    
    voRTCGetDateTime(u8CurrentTimeArr);
    
-   if (msu8Size < (MAX_SIZE + 1) && u8FirstIsSmaller(u8CurrentTimeArr, u8DateTime))
+   if (msu8Size < (MAX_SIZE) && u8FirstIsSmaller(u8CurrentTimeArr, u8DateTime))
    {
       msstScheduleArr[msu8Size].u8Pot = u8Pot;
       msstScheduleArr[msu8Size].u8Duration = u8Duration;
@@ -439,6 +439,22 @@ u8 u8ScheduleCompareFirst(vo)
    return 0;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : voScheduleReschedule
+ * 
+ * DESCRIPTION    : Called upon when a watering shall be rescheduled after it's
+ *                  executed. Calculates the date for the new watering.
+ * 
+ * INPUT          : struct SCHEDULE_ITEM
+ * 
+ * OUTPUT         : -
+ * 
+ * NOTE           : -
+ * 
+******************************************************************************** 
+*/
 vo voScheduleReschedule(SCHEDULE_ITEM stWatering)
 {
    u8 u8DaysInMonthArr[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
