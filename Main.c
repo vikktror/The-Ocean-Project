@@ -3,6 +3,7 @@
 #include "ADCDriver.h"
 #include "Configuration.h"
 #include "DataTypes.h"
+#include "DistanceSensor.h"
 #include "I2C.h"
 #include "MainProgram.h"
 #include "MenuDriver.h"
@@ -60,13 +61,16 @@ int main(vo)
    while (1)
    {
       voLEDBlink();
-      voRTCTask();
-      voWateringFeedTask();
-      voWateringTask();
+      voDistanceSensorTask();
+//      voRTCTask();
+//      voWateringFeedTask();
+//      voWateringTask();
+//      
+//      if (!u8WateringGetMutexStatus())
+//      {
+//         voMainProgramTask();
+//      }
       
-      if (!u8WateringGetMutexStatus())
-      {
-         voMainProgramTask();
-      }
+      
    }
 }

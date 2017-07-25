@@ -1,6 +1,7 @@
 #include <xc.h>
 
 #include "ADCDriver.h"
+#include "DistanceSensor.h"
 #include "I2C.h"
 #include "MenuDriver.h"
 #include "OLED.h"
@@ -23,6 +24,7 @@ extern u8 mu8MenuHandlerDelay;
 extern u8 mu8ADCDelay;
 extern u16 mu16WateringDelay;
 extern u8 mu8FeedDelay;
+extern u8 mu8DistanceSensorDelay;
 
 static u8 msu8PushButtonDelay;
 
@@ -85,6 +87,10 @@ void _ISR __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
    if (msu8PushButtonDelay > 0)
    {
       msu8PushButtonDelay--;
+   }
+   if (mu8DistanceSensorDelay > 0)
+   {
+      mu8DistanceSensorDelay--;
    }
    
    _T1IF = 0;  /* Reset interrupt flag */
