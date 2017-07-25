@@ -8,7 +8,6 @@
 #include "MenuDriver.h"
 #include "MotorDriver.h"
 #include "OLED.h"
-#include "PositioningLEDs.h"
 #include "RotaryEncoder.h"
 #include "RTC.h"
 #include "ScheduleDriver.h"
@@ -51,7 +50,6 @@ vo voBoardInit(vo)
    voMotorInit();
    voADCInit();
    voWateringInit();
-   voPositioningLEDsInit();
 }
 
 int main(vo)
