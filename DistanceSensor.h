@@ -11,6 +11,7 @@
 #include <xc.h>
 #include "DataTypes.h"
 
+u16 u16DistanceSensorGetValue(vo);
 vo voDistanceSensorTask(vo);
 
 #endif	/* DISTANCESENSOR_H */

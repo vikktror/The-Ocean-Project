@@ -9,6 +9,7 @@
 #include "MenuDriver.h"
 #include "MotorDriver.h"
 #include "OLED.h"
+#include "PumpNavigation.h"
 #include "RotaryEncoder.h"
 #include "RTC.h"
 #include "ScheduleDriver.h"
@@ -57,20 +58,17 @@ int main(vo)
 {
    /* Initiation sequense */
    voBoardInit();
-  
+   
    while (1)
    {
       voLEDBlink();
-      voDistanceSensorTask();
-//      voRTCTask();
-//      voWateringFeedTask();
-//      voWateringTask();
-//      
-//      if (!u8WateringGetMutexStatus())
-//      {
-//         voMainProgramTask();
-//      }
+      voRTCTask();
+      voWateringFeedTask();
+      voWateringTask();
       
-      
+      if (!u8WateringGetMutexStatus())
+      {
+         voMainProgramTask();
+      } 
    }
 }

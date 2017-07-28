@@ -4,6 +4,7 @@
 
 #include "DataTypes.h"
 #include "OLED.h"
+#include "PumpNavigation.h"
 #include "RTC.h"
 #include "ScheduleDriver.h"
 #include "Watering.h"
@@ -236,6 +237,8 @@ vo voWateringTask(vo)
    typedef enum
    {
       CHECK_FEED_SIZE = 0,
+      NAVIGATE,
+      START_PUMP,
       WATER,
       WAIT
    }WATERING_TYPE;
@@ -258,16 +261,27 @@ vo voWateringTask(vo)
             voOLEDHome();
             
             printf("Watering pot: %u", msstWateringFeedArr[0].u8Pot);
-            WATER_PUMP = 1;
             
-            mu16WateringDelay = (10 * (u16)msstWateringFeedArr[0].u8Duration);
-            senState = WATER;
+            senState = NAVIGATE;
          }
          else
          {
             senState = WAIT;
             mu16WateringDelay = 50;
          }
+      break;
+      
+      case NAVIGATE:
+         if (u8PumpNavigationTask(msstWateringFeedArr[0].u8Pot))
+         {
+            senState = START_PUMP;
+         }
+      break;
+      
+      case START_PUMP:
+         WATER_PUMP = 1;
+         mu16WateringDelay = (10 * (u16)msstWateringFeedArr[0].u8Duration);
+         senState = WATER;
       break;
       
       case WATER:

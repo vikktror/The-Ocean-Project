@@ -359,8 +359,8 @@ u8 u8MenuConfigurePot(vo)
       enLockStatus = LOCKED;  /* Lock to make this code just run once */
    }
    
-   /* Run voRotaryEncoderTask with max 4 pots */
-   voRotaryEncoderTask(4, 1, 0);
+   /* Run voRotaryEncoderTask with max 5 pots */
+   voRotaryEncoderTask(5, 1, 0);
    su8RotaryCounter = u8GetRotaryValue(); 
    
    /* Run the tick task and get the value */
