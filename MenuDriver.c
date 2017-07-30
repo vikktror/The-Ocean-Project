@@ -4,6 +4,7 @@
 
 #include "DataTypes.h"
 #include "MenuDriver.h"
+#include "MotorDriver.h"
 #include "OLED.h"
 #include "RotaryEncoder.h"
 #include "RTC.h"
@@ -12,6 +13,7 @@
 
 static const u8 mscu8DayArr[7][5] = {"Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat.", "Sun."};
 static const u8 mscu8RepeatStrArr[4][16] = {"Never", "Every Day", "Every Other Day", "Every Week"};
+static const u8 mscu8DirectionArr[2][9] = {"Forward", "Backward"};
 
 u8 mu8MenuHandlerDelay;
 
@@ -28,7 +30,7 @@ typedef enum
  * 
  * DESCRIPTION    : Handling single lined menues of any size
  * 
- * INPUT          : 8-bit number (number of headers in menu),
+ * INPUT          : 8-bit number (number of headers in menu - 1),
  *                  8-bit pointer to 2-dimensional array containing headers of
  *                  max 13 bytes each.
  * 
@@ -858,4 +860,211 @@ u8 u8MenuSchedulerTask(EVENT_TYPE enEvent)
    
    return 0;
    
+}
+
+u8 u8MenuConfigureMotor(vo)
+{  
+   static u8 su8Counter = 0;     /* Counts the number of laps the function has been run */
+   static u8 su8RotaryCounter;   /* Holds the current value of the rotary */   
+   static u8 su8RotPreVal = 150; /* Holds the value of previous value of rotary, 150 is default value*/
+   static u8 su8Direction = 0;
+   static u8 su8MotorSpeed = 5;  /* Set to 5 by default */
+   
+   static const u8 scu8SettingsArr[2][2] = {{1, 0}, {10, 1}};
+   
+   static LOCK_STATUS enLockStatus = UNLOCKED;
+   
+   static TICK_STATUS senTick;   /* Holds the current value of TICK */
+   static TICK_STATUS senPreTick;/* Holds the value of previous value of rotary,  is default value */
+   
+   /* This code shall only run the first time this function is called */
+   if (enLockStatus == UNLOCKED)
+   {
+      /* Set this  */
+      voOLEDClear();
+      voOLEDHome();
+      printf("%s", mscu8DirectionArr[su8Direction]);
+      voOLEDRowTwo();
+      printf("Speed: %u", su8MotorSpeed);
+      enLockStatus = LOCKED;  /* Lock to make this code just run once */
+   }
+   
+   /* Run voRotaryEncoderTask with unique settings for each time parameter */
+   voRotaryEncoderTask(scu8SettingsArr[su8Counter][0], scu8SettingsArr[su8Counter][1], 0);
+   su8RotaryCounter = u8GetRotaryValue(); /* Get the value from module */ 
+   
+   /* Run the tick task and get the value */
+   voTickTask(25);
+   senTick = enGetTick();
+   
+   /* Check if the rotary encoder has been turned or if the tick has changed */
+   if (su8RotaryCounter != su8RotPreVal || senTick != senPreTick)
+   {
+      if (su8Counter == 0)
+      {
+         su8Direction = su8RotaryCounter;
+         voOLEDHome();
+         if (senTick == ON)
+         {
+            printf("%s", mscu8DirectionArr[su8RotaryCounter]);
+         }
+         else if (senTick == OFF)
+         {
+            printf("        ");
+         }
+      }
+      else if (su8Counter == 1)
+      {
+         su8MotorSpeed = su8RotaryCounter;
+         voOLEDRowTwo();
+         if (senTick == ON)
+         {
+            printf("Speed: %u", su8MotorSpeed);
+            
+            if (su8MotorSpeed < 10)
+            {
+               voOLEDMoveCursor(1, 8);
+               printf(" ");
+            }
+         }
+         else if (senTick == OFF)
+         {
+            printf("         ");
+         }
+      }
+      
+      su8RotPreVal = su8RotaryCounter;
+      senPreTick = senTick;
+   }
+   
+   if (enGetRotaryButton() == PRESSED)
+   {
+      if (su8Counter == 0)
+      {
+         voSetRotaryValue(su8MotorSpeed);
+      
+         if (senTick == OFF)
+         {
+            voOLEDHome();
+            printf("%s", mscu8DirectionArr[su8Direction]);
+         }
+      }
+      
+      /* Reset variables and prepare for next call */
+      su8Counter++;
+      su8RotPreVal = 150;
+      
+      if (su8Counter > 1 ) /* If last lap */
+      {
+         su8Counter = 0;
+         senPreTick = OFF;
+         voTickReset();
+         voResetRotaryValue();
+         enLockStatus = UNLOCKED;   /* Unlock the variable again for next session */
+         
+         if (su8Direction == 0)
+         {
+            voMotorForward();
+         }
+         else if (su8Direction == 1)
+         {
+            voMotorBackward();
+         }
+         
+         voMotorSetSpeedByLevel(su8MotorSpeed);
+         
+         return 1;
+      }
+   }
+   return 150;
+}
+
+u8 u8MenuStopMotor(vo)
+{
+   static TICK_STATUS senTick;
+   static TICK_STATUS senPreTick;
+   
+   /* Run the tick task and get the value */
+   voTickTask(25);
+   senTick = enGetTick();
+  
+   if (senTick != senPreTick)
+   {
+      voOLEDHome();
+      if (senTick == ON)
+      {
+         printf("STOP");
+      }
+      else if (senTick == OFF)
+      {
+         printf("    ");
+      }
+      senPreTick = senTick;
+   }
+   
+   if (enGetRotaryButton() == PRESSED)
+   {
+      senPreTick = OFF;
+      voTickReset();
+      return 1;
+   }
+   return 150;
+}
+
+u8 u8MenuMovePump(vo)
+{
+   typedef enum
+   {
+      CONFIGURE_MOTOR = 0,
+      PUMP_RUNNING,
+      PUMP_STOPPED
+   }MOVE_PUMP_TYPE;
+   
+   u8 u8MenuCD[2][13] = {"CONTINUE", "DONE"}; /* CD = Continue/Done */
+   
+   static MOVE_PUMP_TYPE senState = CONFIGURE_MOTOR;
+   static u8 su8MotorConfigDone;
+   static u8 su8MotorStop;
+   static u8 su8UserDone;
+   
+   switch (senState)
+   {
+      case CONFIGURE_MOTOR:
+         su8MotorConfigDone = u8MenuConfigureMotor();
+         if (su8MotorConfigDone != 150) /* Returns 150 when not done */
+         {
+            voOLEDClear();
+            senState = PUMP_RUNNING;
+         }
+      break;
+      
+      case PUMP_RUNNING:
+         su8MotorStop = u8MenuStopMotor();
+         if (su8MotorStop != 150) /* Returns 150 when not done */
+         {
+            voMotorStop();
+            voMotorSetSpeed(0);
+            senState = PUMP_STOPPED;
+         }
+      break;
+      
+      case PUMP_STOPPED:
+         su8UserDone = u8MenuSingleLine(1, u8MenuCD);
+         
+         if (su8UserDone == 0)
+         {
+            senState = CONFIGURE_MOTOR;
+         }
+         else if (su8UserDone == 1)
+         {
+            senState = CONFIGURE_MOTOR;
+            return 1;
+         }
+         
+      break;
+      
+      default:
+      break;
+   }
+   return 0;
 }

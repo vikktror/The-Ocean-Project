@@ -34,7 +34,6 @@ typedef enum
    BACKWARD
 }DIRECTION;
 
-
 u8 u8PumpNavigationTask(u8 u8DesiredPot)
 {
    /* The starting position of the pump shall be at first pot (looking at device from behind, left -> right). */

@@ -115,6 +115,15 @@ vo voMotorSetSpeed(u16 u16MotorSpeed)
    }
 }
 
+vo voMotorSetSpeedByLevel(u8 u8MotorLevel)
+{
+   if (u8MotorLevel > 0 && u8MotorLevel <= 10)
+   {
+      /* Calculates the motor speed from a number between 1 - 10 */
+      MOTOR_DC = (40 * u8MotorLevel) + 160;
+   }
+}
+
  /*
  *******************************************************************************
  * FUNCTION NAME : voMotorStop

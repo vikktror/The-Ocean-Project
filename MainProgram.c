@@ -5,12 +5,13 @@
 #include "MainProgram.h"
 #include "MenuDriver.h"
 #include "OLED.h"
+#include "PumpNavigation.h"
 #include "RotaryEncoder.h"
 #include "RTC.h"
 #include "ScheduleDriver.h"
 #include "Tick.h"
 
-#define MENU1_ARR_ITEMS    (3)
+#define MENU1_ARR_ITEMS    (4)
 #define MENU1_ITEMS        (MENU1_ARR_ITEMS - 1)
 
 #define SCHEDULE_ARR_ITEMS (5)
@@ -23,7 +24,7 @@ typedef enum
    MENU1,
    SCHEDULE,
    SET_CLOCK,
-   ENDCASE
+   MOVE_PUMP
 }MAIN_TYPE;
 
 typedef enum
@@ -60,14 +61,14 @@ vo voMainProgramTask(vo)
    u8 u8ChoosenHeader;
    
    /* MENU1 ASSOCIATED */
-   u8 u8Menu1 [MENU1_ARR_ITEMS][13] = {"SCHEDULE", "SET CLOCK", "DONE"};
+   u8 u8Menu1 [MENU1_ARR_ITEMS][13] = {"SCHEDULE", "SET CLOCK", "MOVE PUMP", "DONE"};
    
    /* SCHEDULE ASSOCIATED */
    u8 u8ScheduleMenu [SCHEDULE_ARR_ITEMS][13] = {"SEE SCHEDULE", "ADD EVENT", "CHANGE EVENT", "REMOVE EVENT", "BACK"};
    static SCHEDULE_TYPE senStateSchedule = SCHEDULE_MENU;
    static EVENT_TYPE enEvent;
    
-   /* SET_CLOCK ASSOCIATED*/
+   /* SET_CLOCK ASSOCIATED */
    static CLOCK_TYPE senStateClock = SET_TIME;
    static u8 su8DateTimeArr[7];
    
@@ -107,8 +108,15 @@ vo voMainProgramTask(vo)
             senState = SET_CLOCK;
          }
 
-         /* DONE */
+         /* MOVE PUMP */
          else if (u8ChoosenHeader == 2)
+         {
+            voOLEDClear();
+            voOLEDHome();
+            senState = MOVE_PUMP;
+         }
+         /* DONE */
+         else if (u8ChoosenHeader == 3)
          {
             voOLEDClear();
             voOLEDHome();
@@ -203,7 +211,11 @@ vo voMainProgramTask(vo)
       break;
       // </editor-fold>
       
-      case ENDCASE:
+      case MOVE_PUMP:
+         if (u8MenuMovePump())
+         {
+            senState = MENU1;
+         }
       break;
          
       default:

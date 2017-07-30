@@ -24,6 +24,7 @@ u8 u8MenuConfigureDuration(vo);
 u8 u8MenuAddNewToSchedule(vo);
 u8 u8MenuChangeInSchedule(u8 u8EventNum);
 u8 u8MenuSchedulerTask(EVENT_TYPE enEvent);
+u8 u8MenuMovePump(vo);
 
 #endif	/* MENUDRIVER_H */
 

@@ -12,6 +12,7 @@ vo voMotorInit(vo);
 vo voMotorForward(vo);
 vo voMotorBackward(vo);
 vo voMotorSetSpeed(u16 u16MotorSpeed);
+vo voMotorSetSpeedByLevel(u8 u8MotorLevel);
 vo voMotorStop(vo);
 
 #endif	/* MOTORDRIVER_H */
