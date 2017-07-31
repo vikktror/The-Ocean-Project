@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ADCDriver.h"
 #include "DataTypes.h"
 #include "MenuDriver.h"
 #include "MotorDriver.h"
@@ -1017,7 +1018,9 @@ u8 u8MenuMovePump(vo)
    {
       CONFIGURE_MOTOR = 0,
       PUMP_RUNNING,
-      PUMP_STOPPED
+      PUMP_STOPPED,
+      CHECK_SENSOR,
+      BLINK_SCREEN
    }MOVE_PUMP_TYPE;
    
    u8 u8MenuCD[2][13] = {"CONTINUE", "DONE"}; /* CD = Continue/Done */
@@ -1057,10 +1060,33 @@ u8 u8MenuMovePump(vo)
          }
          else if (su8UserDone == 1)
          {
+            senState = CHECK_SENSOR;
+         }
+         
+      break;
+      
+      case CHECK_SENSOR:
+         if (u16ADCRead10Bit() >= 600)
+         {
             senState = CONFIGURE_MOTOR;
             return 1;
          }
-         
+         else
+         {
+            voOLEDClear();
+            voOLEDHome();
+            printf("Move the sensor");
+            voOLEDRowTwo();
+            printf("in front of pot.");
+            senState = BLINK_SCREEN;
+         }
+      break;
+      
+      case BLINK_SCREEN:
+         if (u8OLEDBlinkScreen(5, 40) != 0)
+         {
+            senState = CONFIGURE_MOTOR;
+         }
       break;
       
       default:

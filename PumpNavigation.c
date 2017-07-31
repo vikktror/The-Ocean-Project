@@ -1,6 +1,9 @@
+#include <stdio.h>
+
 #include "PumpNavigation.h"
 #include "ADCDriver.h"
 #include "MotorDriver.h"
+#include "OLED.h"
 
 u8 mu8PumpNavigationDelay;
 
@@ -101,7 +104,7 @@ u8 u8PumpNavigationTask(u8 u8DesiredPot)
          }
          
          /* Change the current pot number if needed */
-         if ( senPrePosition != IN_BETWEEN && senPrePosition == IN_BETWEEN)
+         if ( senPosition != IN_BETWEEN && senPrePosition == IN_BETWEEN)
          {
             if (senDirection == FORWARD)
             {
