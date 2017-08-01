@@ -12,7 +12,7 @@
 #define WATER_PUMP      (LATDbits.LATD1)
 #define WATER_PUMP_TRIS (TRISDbits.TRISD1)
 
-#define FEED_MAX_SIZE   (4)
+#define FEED_MAX_SIZE   (5)
 
 /* Lock when a pot is to be watered */
 static u8 msu8WateringMutex = 0;
