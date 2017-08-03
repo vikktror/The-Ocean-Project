@@ -4,15 +4,15 @@
 #include "ADCDriver.h"
 #include "MotorDriver.h"
 #include "OLED.h"
+#include "Timer.h"
 
 u8 mu8PumpNavigationDelay;
-
-
 
 typedef enum
 {
    INITIAL_CHECK = 0,
    NAVIGATE,
+   CHECK_TIMER,
    READ_SENSOR,
    INTERPRET_SENSOR,
    FINE_TUNING,
@@ -50,6 +50,8 @@ u8 u8PumpNavigationTask(u8 u8DesiredPot)
    static DIRECTION senDirection = FORWARD;
    
    static u16 su16SensorVal = 0;
+   static u8 u8MaxTime = 0;
+   static u8 u8DistanceInPots = 0;  /* The distance in pots */
    
    switch (senState)
    {
@@ -61,6 +63,21 @@ u8 u8PumpNavigationTask(u8 u8DesiredPot)
          }
          else
          {
+            voTimerStart();
+            
+            /* Calculate number of pots to travel */
+            if (u8DesiredPot > su8CurrentPot)
+            {
+               u8DistanceInPots = (u8DesiredPot - su8CurrentPot);
+            }
+            else
+            {
+               u8DistanceInPots = (su8CurrentPot - u8DesiredPot);
+            }
+            
+            /* Calculate maxtime */
+            u8MaxTime = (16 * u8DistanceInPots) + 2;
+            
             senState = NAVIGATE;
          }
       break;
@@ -77,6 +94,20 @@ u8 u8PumpNavigationTask(u8 u8DesiredPot)
          {
             voMotorBackward();
             senDirection = BACKWARD;
+         }
+         
+         senState = CHECK_TIMER;
+      break;
+      
+      case CHECK_TIMER: 
+         if (u8MaxTime < u8TimerGetSeconds())
+         {
+            /* Timer error */
+            voTimerStop();
+            voTimerReset();
+            
+            voMotorStop();
+            return 2;
          }
          
          senState = READ_SENSOR;
@@ -120,9 +151,13 @@ u8 u8PumpNavigationTask(u8 u8DesiredPot)
          
          if (senPosition == IN_POSITION && u8DesiredPot == su8CurrentPot)
          {
-            // DONE
+            /* DONE */
             voMotorStop();
             voMotorSetSpeed(0);
+            
+            voTimerStop();
+            voTimerReset();
+            
             senState = INITIAL_CHECK;
             return 1;
          }
@@ -146,7 +181,7 @@ u8 u8PumpNavigationTask(u8 u8DesiredPot)
       case WAIT:
          if (mu8PumpNavigationDelay == 0)
          {
-            senState = READ_SENSOR;
+            senState = CHECK_TIMER;
          }
       break;
       

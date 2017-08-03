@@ -272,9 +272,18 @@ vo voWateringTask(vo)
       break;
       
       case NAVIGATE:
-         if (u8PumpNavigationTask(msstWateringFeedArr[0].u8Pot))
+         if (u8PumpNavigationTask(msstWateringFeedArr[0].u8Pot) == 1)
          {
             senState = START_PUMP;
+         }
+         else if (u8PumpNavigationTask(msstWateringFeedArr[0].u8Pot) == 2)
+         {
+            voOLEDClear();
+            voOLEDHome();
+            printf("Motor error!");
+            voOLEDRowTwo();
+            printf("Please reboot...");
+            while(1);
          }
       break;
       

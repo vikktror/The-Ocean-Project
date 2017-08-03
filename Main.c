@@ -3,7 +3,6 @@
 #include "ADCDriver.h"
 #include "Configuration.h"
 #include "DataTypes.h"
-#include "DistanceSensor.h"
 #include "I2C.h"
 #include "MainProgram.h"
 #include "MenuDriver.h"
@@ -15,6 +14,7 @@
 #include "ScheduleDriver.h"
 #include "StatusLED.h"
 #include "Tick.h"
+#include "Timer.h"
 #include "Watering.h"
 
 
@@ -62,6 +62,7 @@ int main(vo)
    while (1)
    {
       voLEDBlink();
+      voTimerTask();
       voRTCTask();
       voWateringFeedTask();
       voWateringTask();

@@ -12,7 +12,6 @@
 #include "DataTypes.h"
 
 u8 u8PumpNavigationTask(u8 u8DesiredPot);
-// u8 u8ReturnHome????
 
 #endif	/* PUMPNAVIGATION_H */
 

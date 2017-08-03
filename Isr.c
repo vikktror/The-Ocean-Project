@@ -1,7 +1,6 @@
 #include <xc.h>
 
 #include "ADCDriver.h"
-#include "DistanceSensor.h"
 #include "I2C.h"
 #include "MenuDriver.h"
 #include "OLED.h"
@@ -10,6 +9,7 @@
 #include "RTC.h"
 #include "StatusLED.h"
 #include "Tick.h"
+#include "Timer.h"
 #include "Watering.h"
 
 
@@ -21,11 +21,11 @@ extern u8 mu8RotaryDelay;
 extern ROTARY_EVENT menRotaryDir;
 extern ROTARY_BUTTON menRotaryButton;
 extern u8 mu8TickDelay;
+extern u8 mu8TimerDelay;
 extern u8 mu8MenuHandlerDelay;
 extern u8 mu8ADCDelay;
 extern u16 mu16WateringDelay;
 extern u8 mu8FeedDelay;
-extern u8 mu8DistanceSensorDelay;
 extern u8 mu8PumpNavigationDelay;
 
 static u8 msu8PushButtonDelay;
@@ -70,6 +70,10 @@ void _ISR __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
    {
       mu8TickDelay--;
    }
+   if (mu8TimerDelay > 0)
+   {
+      mu8TimerDelay--;
+   }
    if (mu8MenuHandlerDelay > 0)
    {
       mu8MenuHandlerDelay--;
@@ -89,10 +93,6 @@ void _ISR __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
    if (msu8PushButtonDelay > 0)
    {
       msu8PushButtonDelay--;
-   }
-   if (mu8DistanceSensorDelay > 0)
-   {
-      mu8DistanceSensorDelay--;
    }
    if (mu8PumpNavigationDelay > 0)
    {
