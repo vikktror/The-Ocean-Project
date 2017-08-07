@@ -17,6 +17,8 @@
 #include "Timer.h"
 #include "Watering.h"
 
+u16 mu16BootDelay;
+
 
 /*
 ********************************************************************************
@@ -47,17 +49,115 @@ vo voBoardInit(vo)
    
    voOLEDInit();
    voI2COpen();
-   voRTCInit();
    voRotaryEncoderInit();
    voMotorInit();
    voADCInit();
    voWateringInit();
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : u8PrintBoot
+ * 
+ * DESCRIPTION    : Prints info about the application at power on
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : 8-bit number (0 = nDone, 1 = Done)
+ * 
+ * NOTE           : -
+******************************************************************************** 
+*/
+u8 u8PrintBoot(vo)
+{  
+   typedef enum
+   {
+      LOGO = 0,
+      MADE_BY,
+      INTERACTION,
+      INFO,
+      WAIT
+   }BOOT_INFO;
+   
+   static BOOT_INFO senState = 0;
+   static BOOT_INFO senPreState = 0;
+   
+   switch (senState)
+   {
+      case LOGO:
+         voOLEDClear();
+         voOLEDHome();
+         printf("   ExtremeH2O   ");
+         
+         senPreState = senState;
+         mu16BootDelay = 400;
+         senState = WAIT;
+      break;
+      
+      case MADE_BY:
+         voOLEDClear();
+         voOLEDHome();
+         printf("Made by:");
+         voOLEDRowTwo();
+         printf("Viktor Holmgren");
+         
+         senPreState = senState;
+         mu16BootDelay = 400;
+         senState = WAIT;
+      break;
+      
+      case INTERACTION:
+         voOLEDClear();
+         voOLEDHome();
+         printf("Twist / push btn");
+         voOLEDRowTwo();
+         printf("to interact.");
+         
+         senPreState = senState;
+         mu16BootDelay = 600;
+         senState = WAIT;
+      break;
+      
+      case INFO:
+         voOLEDClear();
+         voOLEDHome();
+         printf("Place sensor at");
+         voOLEDRowTwo();
+         printf("location no 1.");
+         
+         senPreState = senState;
+         mu16BootDelay = 600;
+         senState = WAIT;
+      break;
+      
+      case WAIT:
+         if (mu16BootDelay == 0)
+         {
+            if (senPreState == INFO)
+            {
+               voOLEDClear();
+               voOLEDHome();
+               return 1;
+            }
+            
+            senState = senPreState + 1;
+         }
+      break;
+      
+      default:
+      break;
+   }
+   
+   return 0;
+}
+
 int main(vo)
 {
    /* Initiation sequense */
    voBoardInit();
+   while(!u8PrintBoot());
+   voRTCInit();
    
    while (1)
    {
