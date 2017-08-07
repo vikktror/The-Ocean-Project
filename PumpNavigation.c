@@ -39,6 +39,21 @@ typedef enum
    BACKWARD
 }DIRECTION;
 
+/*
+ *******************************************************************************
+ * FUNCTION NAME : u8PumpNavigationTask
+ *
+ * DESCRIPTION   : Automatic control of the motor. Counts pot and starts timer, 
+ *                 etc...
+ *
+ * INPUT         : The desired pot to stop at.
+ *
+ * OUTPUT        : 8-bit number (1 = success, 0 = nDone, 2 = timer error).
+ *
+ * NOTE          : The current pot number must be 1 at first call after reboot.
+ *
+ *******************************************************************************
+ */
 u8 u8PumpNavigationTask(u8 u8DesiredPot)
 {
    /* The starting position of the pump shall be at first pot (looking at device from behind, left -> right). */

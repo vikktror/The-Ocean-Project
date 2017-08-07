@@ -115,12 +115,26 @@ vo voMotorSetSpeed(u16 u16MotorSpeed)
    }
 }
 
+ /*
+ *******************************************************************************
+ * FUNCTION NAME : voMotorSetSpeedByLevel
+ *
+ * DESCRIPTION   : Calculate and sets the motor speed from a number 1-10.
+ *
+ * INPUT         : 8-bit number (1-10)
+ *
+ * OUTPUT        : -
+ *
+ * NOTE          : -
+ *
+ *******************************************************************************
+ */
 vo voMotorSetSpeedByLevel(u8 u8MotorLevel)
 {
    if (u8MotorLevel > 0 && u8MotorLevel <= 10)
    {
-      /* Calculates the motor speed from a number between 1 - 10 */
-      MOTOR_DC = (40 * u8MotorLevel) + 160;
+      /* Calculates the motor speed from a number between 1 - 10 and sets it. */
+      voMotorSetSpeed((40 * u8MotorLevel) + 160);
    }
 }
 

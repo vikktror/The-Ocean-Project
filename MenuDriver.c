@@ -863,6 +863,22 @@ u8 u8MenuSchedulerTask(EVENT_TYPE enEvent)
    
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : u8MenuConfigureMotor
+ * 
+ * DESCRIPTION    : Prints/handling motor settings when steering the motor 
+ *                  manually.
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : 8-bit number (1 = done, 150 = not done)
+ * 
+ * NOTE           : -
+ * 
+******************************************************************************** 
+*/
 u8 u8MenuConfigureMotor(vo)
 {  
    static u8 su8Counter = 0;     /* Counts the number of laps the function has been run */
@@ -980,6 +996,21 @@ u8 u8MenuConfigureMotor(vo)
    return 150;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : u8MenuStopMotor
+ * 
+ * DESCRIPTION    : Lets the user manually stop the motor
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : 8-bit number (1 = done, 150 = not done)
+ * 
+ * NOTE           : -
+ * 
+******************************************************************************** 
+*/
 u8 u8MenuStopMotor(vo)
 {
    static TICK_STATUS senTick;
@@ -1012,6 +1043,21 @@ u8 u8MenuStopMotor(vo)
    return 150;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : u8MenuMovePump
+ * 
+ * DESCRIPTION    : The menu for the the manual motor control.
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : 8-bit number (1 = done, 0 = not done)
+ * 
+ * NOTE           : -
+ * 
+******************************************************************************** 
+*/
 u8 u8MenuMovePump(vo)
 {
    typedef enum

@@ -8,6 +8,7 @@
 #include "RTC.h"
 #include "ScheduleDriver.h"
 #include "Watering.h"
+#include "MotorDriver.h"
 
 #define WATER_PUMP      (LATDbits.LATD1)
 #define WATER_PUMP_TRIS (TRISDbits.TRISD1)
@@ -207,10 +208,11 @@ vo voWateringFeedTask(vo)
          voOLEDRowTwo();
          printf("full! Reboot.");
          
-         /**************************************************************************************************************************
-          * Stop motors and shut off relay
-          **************************************************************************************************************************/
+         voMotorStop();
+         voMotorSetSpeed(0);         
+         WATER_PUMP = 0;         
          while(1);
+         
       break;
       
       default:
@@ -272,10 +274,12 @@ vo voWateringTask(vo)
       break;
       
       case NAVIGATE:
+         /* Pump reached the desired pot */
          if (u8PumpNavigationTask(msstWateringFeedArr[0].u8Pot) == 1)
          {
             senState = START_PUMP;
          }
+         /* Timer overflow. Motor (or maybe sensor) failure. */
          else if (u8PumpNavigationTask(msstWateringFeedArr[0].u8Pot) == 2)
          {
             voOLEDClear();
@@ -283,6 +287,7 @@ vo voWateringTask(vo)
             printf("Motor error!");
             voOLEDRowTwo();
             printf("Please reboot...");
+            
             while(1);
          }
       break;
@@ -294,7 +299,7 @@ vo voWateringTask(vo)
       break;
       
       case WATER:
-         // Check if the watering duration has reached 0.
+         /* Check if the watering duration has reached 0. */
          if (mu16WateringDelay == 0)
          {
             WATER_PUMP = 0;

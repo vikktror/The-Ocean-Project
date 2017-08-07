@@ -19,26 +19,102 @@ typedef enum
 static START_REQ msenStartReq = nSTART;
 static STOP_REQ msenStopReq = nSTOP;
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : voTimerStart
+ * 
+ * DESCRIPTION    : Request the timer to start.
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : -
+ * 
+ * NOTE           : voTimerTask() must run simultaneously.
+ * 
+******************************************************************************** 
+*/
 vo voTimerStart(vo)
 {
    msenStartReq = START;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : voTimerStop
+ * 
+ * DESCRIPTION    : Request the timer to stop.
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : -
+ * 
+ * NOTE           : voTimerTask() must run simultaneously.
+ * 
+******************************************************************************** 
+*/
 vo voTimerStop(vo)
 {
    msenStopReq = STOP;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : voTimerReset
+ * 
+ * DESCRIPTION    : Resets the time variable counted in voTimerTask().
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : -
+ * 
+ * NOTE           : -
+ * 
+******************************************************************************** 
+*/
 vo voTimerReset(vo)
 {
    msu8Seconds = 0;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : u8TimerGetSeconds
+ * 
+ * DESCRIPTION    : Returns the time variable counted in voTimerTask().
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : 8-bit number (number of seconds since timer start).
+ * 
+ * NOTE           : -
+ * 
+******************************************************************************** 
+*/
 u8 u8TimerGetSeconds(vo)
 {
    return msu8Seconds;
 }
 
+/*
+********************************************************************************
+ * 
+ * FUNCTION NAME  : voTimerTask()
+ * 
+ * DESCRIPTION    : Runs the timer.
+ * 
+ * INPUT          : -
+ * 
+ * OUTPUT         : -
+ * 
+ * NOTE           : Start/stop/reset/get (value) using the other functions in 
+ *                  this module.
+ * 
+******************************************************************************** 
+*/
 vo voTimerTask(vo)
 {
    typedef enum
