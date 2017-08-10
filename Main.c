@@ -77,11 +77,20 @@ u8 u8PrintBoot(vo)
       MADE_BY,
       INTERACTION,
       INFO,
-      WAIT
+      WAIT,
+      DO_NOTHING
    }BOOT_INFO;
    
    static BOOT_INFO senState = 0;
    static BOOT_INFO senPreState = 0;
+   
+   if (enGetRotaryButton() == PRESSED)
+   {
+      voOLEDClear();
+      voOLEDHome();
+      voResetRotaryValue();
+      return 1;
+   }
    
    switch (senState)
    {
@@ -125,9 +134,8 @@ u8 u8PrintBoot(vo)
          printf("Place sensor at");
          voOLEDRowTwo();
          printf("location no 1.");
-         
          senPreState = senState;
-         mu16BootDelay = 600;
+         mu16BootDelay = 1000;
          senState = WAIT;
       break;
       
@@ -143,6 +151,9 @@ u8 u8PrintBoot(vo)
             
             senState = senPreState + 1;
          }
+      break;
+      
+      case DO_NOTHING:
       break;
       
       default:

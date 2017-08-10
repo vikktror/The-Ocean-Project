@@ -247,6 +247,7 @@ vo voWateringTask(vo)
 
    static WATERING_TYPE senState = CHECK_FEED_SIZE;
    static u8 su8ScreenArr[32];
+   static u32 u32CalcSeconds = 0;
    
    switch (senState)
    {
@@ -294,7 +295,18 @@ vo voWateringTask(vo)
       
       case START_PUMP:
          WATER_PUMP = 1;
-         mu16WateringDelay = (10 * (u16)msstWateringFeedArr[0].u8Duration);
+         
+         /* Calculations taken from an Excel diagram and then a formula was
+          * calculated. */
+         u32CalcSeconds = ( ( ( 7432 * (u32)msstWateringFeedArr[0].u8Duration ) - 14500 ) / 100 );
+         mu16WateringDelay = (u16)u32CalcSeconds;
+         
+//         voOLEDClear();
+//         voOLEDHome();
+//         
+//         printf("%u", mu16WateringDelay);
+//         while(1);
+         
          senState = WATER;
       break;
       

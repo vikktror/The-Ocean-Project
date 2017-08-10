@@ -403,9 +403,10 @@ u8 u8MenuConfigurePot(vo)
 /*
 ********************************************************************************
  * 
- * FUNCTION NAME  : u8MenuConfigureDuration
+ * FUNCTION NAME  : u8MenuConfigureWaterAmount
  * 
- * DESCRIPTION    : The user may choose duration of watering using the rotary encoder
+ * DESCRIPTION    : The user may choose duration of watering using the rotary 
+ *                  encoder
  * 
  * INPUT          : -
  * 
@@ -415,9 +416,9 @@ u8 u8MenuConfigurePot(vo)
  * 
 ******************************************************************************** 
 */
-u8 u8MenuConfigureDuration(vo)
+u8 u8MenuConfigureWaterAmount(vo)
 {
-   static u8 su8Duration = 0;
+   static u8 su8Amount = 0;
    
    static u8 su8Counter = 0;
    static u8 su8RotaryCounter;  
@@ -433,13 +434,13 @@ u8 u8MenuConfigureDuration(vo)
       /* Set this  */
       voOLEDClear();
       voOLEDHome();
-      printf("Duration: ");
-      voResetRotaryValue();
+      printf("Amount of water:");
+      voSetRotaryValue(4);
       enLockStatus = LOCKED;  /* Lock to make this code just run once */
    }
    
-   /* Run voRotaryEncoderTask with maxcount = 50 */
-   voRotaryEncoderTask(50, 0, 1);
+   /* Run voRotaryEncoderTask with maxcount = 4 */
+   voRotaryEncoderTask(16, 4, 0);
    su8RotaryCounter = u8GetRotaryValue(); 
    
    /* Run the tick task and get the value */
@@ -448,14 +449,14 @@ u8 u8MenuConfigureDuration(vo)
   
    if (su8RotaryCounter != su8RotPreVal || senTick != senPreTick)
    {
-      voOLEDMoveCursor(0, 10);
+      voOLEDRowTwo();
       if (senTick == ON)
       {
-         printf("%u.%u s", (su8RotaryCounter / 10), (su8RotaryCounter % 10));
+         printf("ca %u.%u dl", (su8RotaryCounter / 2), (su8RotaryCounter % 2) * 5);
       }
       else if (senTick == OFF)
       {
-         printf("     ");
+         printf("         ");
       }
       su8RotPreVal = su8RotaryCounter;
       senPreTick = senTick;
@@ -463,7 +464,7 @@ u8 u8MenuConfigureDuration(vo)
    
    if (enGetRotaryButton() == PRESSED)
    {
-      su8Duration = su8RotaryCounter;
+      su8Amount = su8RotaryCounter;
       su8RotPreVal = 150;
       su8Counter = 0;
       senPreTick = OFF;
@@ -471,7 +472,7 @@ u8 u8MenuConfigureDuration(vo)
       voResetRotaryValue();
       enLockStatus = UNLOCKED;
       
-      return su8Duration;
+      return su8Amount;
    }
    return 150;
 }
@@ -595,7 +596,7 @@ u8 u8MenuAddNewToSchedule(vo)
       break;
       
       case CHOOSE_DURATION:
-         su8Duration = u8MenuConfigureDuration();
+         su8Duration = u8MenuConfigureWaterAmount();
          
          if (su8Duration != 150)
          {
@@ -641,7 +642,7 @@ u8 u8MenuAddNewToSchedule(vo)
  * 
  * FUNCTION NAME  : u8MenuChangeInSchedule
  * 
- * DESCRIPTION    : The user makes decisions about how to change an event
+ * DESCRIPTION    : The user makes changes in a previous set watering
  * 
  * INPUT          : 8-bit number (event to change)
  * 
@@ -679,7 +680,7 @@ u8 u8MenuChangeInSchedule(u8 u8EventNum)
       break;
       
       case CHOOSE_DURATION:
-         su8Duration = u8MenuConfigureDuration();
+         su8Duration = u8MenuConfigureWaterAmount();
          
          if (su8Duration != 150)
          {
