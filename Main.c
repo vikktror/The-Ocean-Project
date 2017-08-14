@@ -17,6 +17,8 @@
 #include "Timer.h"
 #include "Watering.h"
 
+#include "WaterTest.h"
+
 u16 mu16BootDelay;
 
 
@@ -183,4 +185,12 @@ int main(vo)
          voMainProgramTask();
       } 
    }
+   
+   
+//   PUMP_TRIS = 0;
+//   while (1)
+//   {
+//      voWaterTest();
+//      
+//   }
 }

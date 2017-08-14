@@ -12,6 +12,8 @@
 #include "Timer.h"
 #include "Watering.h"
 
+#include "WaterTest.h"
+
 
 extern u8 mu8LEDDelay;
 extern u8 mu8OLEDDelay;
@@ -30,6 +32,8 @@ extern u8 mu8PumpNavigationDelay;
 extern u16 mu16BootDelay; 
 
 static u8 msu8PushButtonDelay;
+
+extern u16 mu16WaterTestDelay;
 
 /*
 ********************************************************************************
@@ -102,6 +106,12 @@ void _ISR __attribute__((interrupt, auto_psv)) _T1Interrupt(void)
    if (mu16BootDelay > 0)
    {
       mu16BootDelay--;
+   }
+   
+   
+   if (mu16WaterTestDelay > 0)
+   {
+      mu16WaterTestDelay--;
    }
    
    _T1IF = 0;  /* Reset interrupt flag */

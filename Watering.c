@@ -297,15 +297,30 @@ vo voWateringTask(vo)
          WATER_PUMP = 1;
          
          /* Calculations taken from an Excel diagram and then a formula was
-          * calculated. */
-         u32CalcSeconds = ( ( ( 7432 * (u32)msstWateringFeedArr[0].u8Duration ) - 14500 ) / 100 );
-         mu16WateringDelay = (u16)u32CalcSeconds;
+          * calculated. */         
          
-//         voOLEDClear();
-//         voOLEDHome();
-//         
-//         printf("%u", mu16WateringDelay);
-//         while(1);
+         
+         u32CalcSeconds = ( ( 7204 * (u32)msstWateringFeedArr[0].u8Duration ) - 13653 );
+         
+         /* Correct an error in calculations, dont know why the error occurs. 
+          * It can be because of water in the pipe. */
+         if (msstWateringFeedArr[0].u8Duration >= 7 && msstWateringFeedArr[0].u8Duration < 10)
+         {
+            u32CalcSeconds = u32CalcSeconds - (2000 * (msstWateringFeedArr[0].u8Duration / 2) );
+         }
+         else if (msstWateringFeedArr[0].u8Duration >= 10 && msstWateringFeedArr[0].u8Duration <= 16)
+         {
+            u32CalcSeconds = u32CalcSeconds - (2500 * (msstWateringFeedArr[0].u8Duration / 2) );
+         }
+         
+         /* Divide for ISR resolution */
+         u32CalcSeconds = u32CalcSeconds / 100;
+         
+         /* Check boundaries. */
+         if (u32CalcSeconds > 0 && u32CalcSeconds < 1500)
+         {
+            mu16WateringDelay = (u16)u32CalcSeconds;
+         }
          
          senState = WATER;
       break;
