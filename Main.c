@@ -17,8 +17,6 @@
 #include "Timer.h"
 #include "Watering.h"
 
-#include "WaterTest.h"
-
 u16 mu16BootDelay;
 
 
@@ -121,7 +119,7 @@ u8 u8PrintBoot(vo)
       case INTERACTION:
          voOLEDClear();
          voOLEDHome();
-         printf("Twist / push btn");
+         printf("Twist//push knob");
          voOLEDRowTwo();
          printf("to interact.");
          
@@ -185,12 +183,4 @@ int main(vo)
          voMainProgramTask();
       } 
    }
-   
-   
-//   PUMP_TRIS = 0;
-//   while (1)
-//   {
-//      voWaterTest();
-//      
-//   }
 }

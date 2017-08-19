@@ -106,7 +106,7 @@ vo voSchdeuleGetFirstElement(SCHEDULE_ITEM* stFirstElementPtr)
    u8 u8Index;
    
    stFirstElementPtr->u8Pot = msstScheduleArr[0].u8Pot;
-   stFirstElementPtr->u8Duration = msstScheduleArr[0].u8Duration;
+   stFirstElementPtr->u8Amount = msstScheduleArr[0].u8Amount;
    stFirstElementPtr->u8Repeat = msstScheduleArr[0].u8Repeat;
    
    for (u8Index = 0; u8Index < 7; u8Index++)
@@ -221,20 +221,20 @@ vo voScheduleSort(vo)
             {
                /* Copy right hand item to a temporary item */
                stTemp.u8Pot = msstScheduleArr[u8Inner].u8Pot;
-               stTemp.u8Duration = msstScheduleArr[u8Inner].u8Duration;
+               stTemp.u8Amount = msstScheduleArr[u8Inner].u8Amount;
                stTemp.u8Repeat = msstScheduleArr[u8Inner].u8Repeat;
                memset(stTemp.u8Time, '\0', sizeof(stTemp.u8Time));
                memcpy(stTemp.u8Time, msstScheduleArr[u8Inner].u8Time, sizeof(msstScheduleArr[u8Inner].u8Time));
 
                /* Replace the right hand item with the left hand one */
                msstScheduleArr[u8Inner].u8Pot = msstScheduleArr[u8Inner - 1].u8Pot;
-               msstScheduleArr[u8Inner].u8Duration = msstScheduleArr[u8Inner - 1].u8Duration;
+               msstScheduleArr[u8Inner].u8Amount = msstScheduleArr[u8Inner - 1].u8Amount;
                msstScheduleArr[u8Inner].u8Repeat = msstScheduleArr[u8Inner -1].u8Repeat;
                memcpy(msstScheduleArr[u8Inner].u8Time, msstScheduleArr[u8Inner - 1].u8Time, sizeof(msstScheduleArr[u8Inner].u8Time));
 
                /* At last: copy the temporary to the left hand item */
                msstScheduleArr[u8Inner - 1].u8Pot = stTemp.u8Pot;
-               msstScheduleArr[u8Inner -1].u8Duration = stTemp.u8Duration;
+               msstScheduleArr[u8Inner -1].u8Amount = stTemp.u8Amount;
                msstScheduleArr[u8Inner -1].u8Repeat = stTemp.u8Repeat;
                memcpy(msstScheduleArr[u8Inner - 1].u8Time, stTemp.u8Time, sizeof(msstScheduleArr[u8Inner - 1].u8Time));
             }
@@ -264,7 +264,7 @@ vo voScheduleSort(vo)
  * 
 ******************************************************************************** 
 */
-u8 u8SchedulePushBack(u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTime)
+u8 u8SchedulePushBack(u8 u8Pot, u8 u8Amount, u8 u8Repeat, u8* u8DateTime)
 {
    u8 u8CurrentTimeArr[7];
    
@@ -273,7 +273,7 @@ u8 u8SchedulePushBack(u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTime)
    if (msu8Size < (MAX_SIZE) && u8FirstIsSmaller(u8CurrentTimeArr, u8DateTime))
    {
       msstScheduleArr[msu8Size].u8Pot = u8Pot;
-      msstScheduleArr[msu8Size].u8Duration = u8Duration;
+      msstScheduleArr[msu8Size].u8Amount = u8Amount;
       msstScheduleArr[msu8Size].u8Repeat = u8Repeat;
       memset(msstScheduleArr[msu8Size].u8Time, '\0', sizeof(msstScheduleArr[msu8Size].u8Time));
       memcpy(msstScheduleArr[msu8Size].u8Time, u8DateTime, sizeof(msstScheduleArr[msu8Size].u8Time));
@@ -313,13 +313,13 @@ vo voSchedulePopFront(vo)
       for (u8Counter = 0; u8Counter < msu8Size; u8Counter++)
       {
          msstScheduleArr[u8Counter].u8Pot = msstScheduleArr[u8Counter + 1].u8Pot;
-         msstScheduleArr[u8Counter].u8Duration = msstScheduleArr[u8Counter + 1].u8Duration;
+         msstScheduleArr[u8Counter].u8Amount = msstScheduleArr[u8Counter + 1].u8Amount;
          msstScheduleArr[u8Counter].u8Repeat = msstScheduleArr[u8Counter + 1].u8Repeat;
          memcpy(msstScheduleArr[u8Counter].u8Time, msstScheduleArr[u8Counter + 1].u8Time, sizeof(msstScheduleArr[u8Counter].u8Time));
       }
 
       msstScheduleArr[msu8Size].u8Pot = '\0';
-      msstScheduleArr[msu8Size].u8Duration = '\0';
+      msstScheduleArr[msu8Size].u8Amount = '\0';
       msstScheduleArr[msu8Size].u8Repeat = '\0';
       memset(msstScheduleArr[msu8Size].u8Time, '\0', sizeof(msstScheduleArr[msu8Size].u8Time));
       
@@ -351,13 +351,13 @@ vo voScheduleRemoveAny(u8 u8ElementNum)
       for (u8Counter = u8ElementNum; u8Counter < msu8Size; u8Counter++)
       {
          msstScheduleArr[u8Counter].u8Pot = msstScheduleArr[u8Counter + 1].u8Pot;
-         msstScheduleArr[u8Counter].u8Duration = msstScheduleArr[u8Counter + 1].u8Duration;
+         msstScheduleArr[u8Counter].u8Amount = msstScheduleArr[u8Counter + 1].u8Amount;
          msstScheduleArr[u8Counter].u8Repeat = msstScheduleArr[u8Counter + 1].u8Repeat;
          memcpy(msstScheduleArr[u8Counter].u8Time, msstScheduleArr[u8Counter + 1].u8Time, sizeof(msstScheduleArr[u8Counter].u8Time));
       }
 
       msstScheduleArr[msu8Size].u8Pot = '\0';
-      msstScheduleArr[msu8Size].u8Duration = '\0';
+      msstScheduleArr[msu8Size].u8Amount = '\0';
       msstScheduleArr[msu8Size].u8Repeat = '\0';
       memset(msstScheduleArr[msu8Size].u8Time, '\0', sizeof(msstScheduleArr[msu8Size].u8Time));
       
@@ -382,7 +382,7 @@ vo voScheduleRemoveAny(u8 u8ElementNum)
  * 
 ******************************************************************************** 
 */
-u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8* u8DateTimeArr)
+u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Amount, u8 u8Repeat, u8* u8DateTimeArr)
 {
    u8 u8CurrentTimeArr[7];
    voRTCGetDateTime(u8CurrentTimeArr);
@@ -390,7 +390,7 @@ u8 u8ScheduleChangeAny(u8 u8ElementNum, u8 u8Pot, u8 u8Duration, u8 u8Repeat, u8
    if (u8ElementNum < msu8Size && msu8Size > 0 && u8FirstIsSmaller(u8CurrentTimeArr, u8DateTimeArr))
    {
       msstScheduleArr[u8ElementNum].u8Pot = u8Pot;
-      msstScheduleArr[u8ElementNum].u8Duration = u8Duration;
+      msstScheduleArr[u8ElementNum].u8Amount = u8Amount;
       msstScheduleArr[u8ElementNum].u8Repeat = u8Repeat;
       memcpy(msstScheduleArr[u8ElementNum].u8Time, u8DateTimeArr, sizeof(msstScheduleArr[u8ElementNum].u8Time));
       voScheduleSort();
@@ -497,6 +497,6 @@ vo voScheduleReschedule(SCHEDULE_ITEM stWatering)
       stWatering.u8Time[2] = u8NewDay;
       
       /* Add item to the schedule */
-      u8SchedulePushBack(stWatering.u8Pot, stWatering.u8Duration, stWatering.u8Repeat, stWatering.u8Time);
+      u8SchedulePushBack(stWatering.u8Pot, stWatering.u8Amount, stWatering.u8Repeat, stWatering.u8Time);
    }
 }

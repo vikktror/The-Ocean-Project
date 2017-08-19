@@ -410,7 +410,7 @@ u8 u8MenuConfigurePot(vo)
  * 
  * INPUT          : -
  * 
- * OUTPUT         : 8-bit number, the duration time in tenths of secs.
+ * OUTPUT         : 8-bit number, the amount of water in dl * 0,5
  * 
  * NOTE           : Returns 150 when not done
  * 
@@ -435,12 +435,12 @@ u8 u8MenuConfigureWaterAmount(vo)
       voOLEDClear();
       voOLEDHome();
       printf("Amount of water:");
-      voSetRotaryValue(4);
+      voSetRotaryValue(2);
       enLockStatus = LOCKED;  /* Lock to make this code just run once */
    }
    
-   /* Run voRotaryEncoderTask with maxcount = 4 */
-   voRotaryEncoderTask(16, 4, 0);
+   /* Run voRotaryEncoderTask with maxcount = 16 */
+   voRotaryEncoderTask(16, 2, 0);
    su8RotaryCounter = u8GetRotaryValue(); 
    
    /* Run the tick task and get the value */

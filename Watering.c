@@ -65,7 +65,7 @@ u8 u8FeedPushBack(SCHEDULE_ITEM* stItem)
    if (msu8FeedSize < (FEED_MAX_SIZE))
    {
       msstWateringFeedArr[msu8FeedSize].u8Pot = stItem->u8Pot;
-      msstWateringFeedArr[msu8FeedSize].u8Duration = stItem->u8Duration;
+      msstWateringFeedArr[msu8FeedSize].u8Amount = stItem->u8Amount;
       msstWateringFeedArr[msu8FeedSize].u8Repeat = stItem->u8Repeat;
       memset(msstWateringFeedArr[msu8FeedSize].u8Time, '\0', sizeof(msstWateringFeedArr[msu8FeedSize].u8Time));
       memcpy(msstWateringFeedArr[msu8FeedSize].u8Time, stItem->u8Time, sizeof(msstWateringFeedArr[msu8FeedSize].u8Time));
@@ -101,13 +101,13 @@ vo voFeedPopFront(vo)
       for (u8Counter = 0; u8Counter < msu8FeedSize; u8Counter++)
       {
          msstWateringFeedArr[u8Counter].u8Pot = msstWateringFeedArr[u8Counter + 1].u8Pot;
-         msstWateringFeedArr[u8Counter].u8Duration = msstWateringFeedArr[u8Counter + 1].u8Duration;
+         msstWateringFeedArr[u8Counter].u8Amount = msstWateringFeedArr[u8Counter + 1].u8Amount;
          msstWateringFeedArr[u8Counter].u8Repeat = msstWateringFeedArr[u8Counter + 1].u8Repeat;
          memcpy(msstWateringFeedArr[u8Counter].u8Time, msstWateringFeedArr[u8Counter + 1].u8Time, sizeof(msstWateringFeedArr[u8Counter].u8Time));
       }
 
       msstWateringFeedArr[msu8FeedSize].u8Pot = '\0';
-      msstWateringFeedArr[msu8FeedSize].u8Duration = '\0';
+      msstWateringFeedArr[msu8FeedSize].u8Amount = '\0';
       msstWateringFeedArr[msu8FeedSize].u8Repeat = '\0';
       memset(msstWateringFeedArr[msu8FeedSize].u8Time, '\0', sizeof(msstWateringFeedArr[msu8FeedSize].u8Time));
       
@@ -244,10 +244,25 @@ vo voWateringTask(vo)
       WATER,
       WAIT
    }WATERING_TYPE;
+   
+   /* 
+    * Look-up table for converting WaterAmount (dl) into time (s * 0,01).
+    * The times has been measured manually in an experiment.
+    *  */
+   static const u16 u16WateringTimeLookUpTable[15] = 
+   {
+      160,  190,
+      220,  260,
+      300,  330,
+      360,  390,
+      430,  470,
+      490,  530,
+      570,  600,
+      640
+   };
 
    static WATERING_TYPE senState = CHECK_FEED_SIZE;
    static u8 su8ScreenArr[32];
-   static u32 u32CalcSeconds = 0;
    
    switch (senState)
    {
@@ -258,6 +273,7 @@ vo voWateringTask(vo)
             msu8WateringMutex = 1;
             voRTCPrintDisable(WATERING);
             
+            /* Read screen for correct printing when watering is done. */
             voOLEDReadScreen(su8ScreenArr);
             
             voOLEDClear();
@@ -296,31 +312,8 @@ vo voWateringTask(vo)
       case START_PUMP:
          WATER_PUMP = 1;
          
-         /* Calculations taken from an Excel diagram and then a formula was
-          * calculated. */         
-         
-         
-         u32CalcSeconds = ( ( 7204 * (u32)msstWateringFeedArr[0].u8Duration ) - 13653 );
-         
-         /* Correct an error in calculations, dont know why the error occurs. 
-          * It can be because of water in the pipe. */
-         if (msstWateringFeedArr[0].u8Duration >= 7 && msstWateringFeedArr[0].u8Duration < 10)
-         {
-            u32CalcSeconds = u32CalcSeconds - (2000 * (msstWateringFeedArr[0].u8Duration / 2) );
-         }
-         else if (msstWateringFeedArr[0].u8Duration >= 10 && msstWateringFeedArr[0].u8Duration <= 16)
-         {
-            u32CalcSeconds = u32CalcSeconds - (2500 * (msstWateringFeedArr[0].u8Duration / 2) );
-         }
-         
-         /* Divide for ISR resolution */
-         u32CalcSeconds = u32CalcSeconds / 100;
-         
-         /* Check boundaries. */
-         if (u32CalcSeconds > 0 && u32CalcSeconds < 1500)
-         {
-            mu16WateringDelay = (u16)u32CalcSeconds;
-         }
+         /* Get the water amount and look up the corresponding watering time. */
+         mu16WateringDelay = u16WateringTimeLookUpTable[msstWateringFeedArr[0].u8Amount - 2];
          
          senState = WATER;
       break;
